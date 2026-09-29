@@ -6,24 +6,30 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
+
 * {
   box-sizing: border-box;
 }
+
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
 }
+
 button,
 input {
   font: inherit;
 }
+
 #root {
   min-height: 100vh;
 }
+
 .ant-btn-primary {
   box-shadow: none;
 }
+
 .ant-input,
 .ant-input-affix-wrapper,
 .ant-select-selector,
@@ -31,19 +37,23 @@ input {
 .ant-input-number {
   border-radius: 5px !important;
 }
+
 .ant-table-wrapper .ant-table {
   border-radius: 6px;
 }
-.ant-table-wrapper .ant-table-thead > tr > th {
+
+.ant-table-wrapper .ant-table-thead>tr>th {
   color: #78857d;
   background: #f7f9f6;
   font-size: 12px;
   font-weight: 600;
 }
-.ant-table-wrapper .ant-table-tbody > tr > td {
+
+.ant-table-wrapper .ant-table-tbody>tr>td {
   color: #36433c;
   font-size: 13px;
 }
+
 .ant-modal .ant-modal-content {
   border-radius: 8px;
 }
