@@ -1,0 +1,87 @@
+# 健身房会员办卡订单管理模块
+
+基于 React 18、Vite、React Router v7、Ant Design v5、Axios 与 Zustand 的会员办卡订单管理前端。模拟数据保存在浏览器 `localStorage`，不需要后端服务。
+
+## 启动
+
+```bash
+npm install
+npm run dev
+```
+
+使用任意用户名和密码登录；默认登录表单填有 `admin / 123456`。常用命令：
+
+```bash
+npm run build
+npm run lint
+npm run format:check
+npm run preview
+```
+
+## 目录结构
+
+```text
+src/
+  data/orders.js             种子数据和 localStorage 持久化
+  hooks/useOrderQuery.js     列表查询 Hook
+  pages/                     登录、订单列表、新建订单页面
+  services/orderApi.js       Axios 实例、拦截器与本地 mock adapter
+  store/auth.js              Zustand 登录状态
+  App.jsx                    路由、鉴权与后台布局
+```
+
+## 请求与状态设计
+
+请求层使用 Axios 实例配置 `/api` baseURL，并由请求拦截器读取 token 注入 `Authorization: Bearer <token>`。当前通过 Axios adapter 模拟订单列表、创建、续卡和撤单接口，统一保留调用边界，未来可替换为真实服务。响应拦截器遇到 401 时清除本地身份并转回登录页。
+
+登录 token 与用户名由 Zustand 管理并同步到 `localStorage`；订单 mock 数据由服务层读写 `club_orders`。订单列表查询抽为 `useOrderQuery`，状态 Tab、姓名模糊搜索、订单号精确搜索、分页与跨页保留勾选都在前端完成。
+
+## CSV 导出澄清问题
+
+业务方的原始描述没有明确财务导出边界，开发前应确认：
+
+1. “不能随便导出”的具体状态有哪些？谁负责配置或审批导出权限？
+2. 导出范围是当前页、当前筛选结果，还是用户勾选的订单？筛选与勾选同时存在时以哪一个为准？
+3. 财务对账要求哪些字段、字段顺序、日期时区与日期格式？是否需要订单备注和会员手机号？
+4. 金额应导出为纯数值、保留两位小数的文本，还是带千分位与货币符号的展示值？
+5. 导出文件的编码、分隔符、文件名格式、最大行数和 Excel 兼容性要求是什么？
+6. 是否需要记录导出人、时间、筛选条件和导出记录，以满足审计要求？
+7. 订单处于处理中或已取消时，是否需要导出特定字段用于追踪或冲销？
+
+## CSV 实现假设
+
+- 当前只允许导出“已完成”和“已到期”订单；待审核、待制卡、待寄卡、已取消均视为不可导出。
+- 导出按钮遵循当前状态 Tab 与搜索条件；存在选中订单时，仅尝试导出选中且匹配当前查询的记录。
+- 文件按筛选结果导出全部记录，不限于当前分页；不选择记录时导出当前筛选结果。
+- 字段为订单号、会员姓名、联系电话、购卡年限、订单金额、状态、创建时间和备注。
+- 金额导出为带千分位、固定两位小数的文本；日期使用浏览器本地时区的 `YYYY/MM/DD`。
+- 使用 UTF-8 BOM 与逗号分隔，以提高中文 Excel 兼容性；不实现服务端审计和权限控制。
+
+## 开发过程中的问题与处理
+
+- 初始目录虽有 Vite 模板，但模板使用 React 19 且不包含题目规定的请求、路由、组件库和状态库；已调整为 React 18 并加入指定依赖。
+- npm 安装遇到旧模板依赖的 React 19 peer 解析告警；显式固定 React 与 React DOM 18.3.1 后，生产构建正常。
+- 跨页保留选择意味着当前页数据不足以校验全部批量操作；续卡与撤单前改为从 mock 查询读取完整订单集再判断状态。
+- Ant Design v5 引入较大的首屏 bundle，Vite 构建目前给出超过 500 kB 的提示，但构建成功。后续可按路由动态拆分组件降低首屏体积。
+
+## 使用工具
+
+- VS Code 与 GitHub Copilot：需求拆解、页面与业务实现、构建问题排查。
+- Vite：本地开发服务及生产构建。
+- npm：依赖安装与脚本执行。
+- ESLint、Prettier：代码静态检查与格式一致性。# React + Vite
+
+This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+
+Currently, two official plugins are available:
+
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+
+## React Compiler
+
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+
+## Expanding the Oxlint configuration
+
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
