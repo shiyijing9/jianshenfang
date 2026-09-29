@@ -106,6 +106,16 @@ export function OrdersPage() {
     setSelectedIds([])
   }
 
+  const updatePageSelection = (nextSelectedRowKeys) => {
+    const currentPageIds = new Set(query.list.map((order) => order.id))
+    const selectedOnCurrentPage = nextSelectedRowKeys.filter((id) => currentPageIds.has(id))
+
+    setSelectedIds((previousIds) => [
+      ...previousIds.filter((id) => !currentPageIds.has(id)),
+      ...selectedOnCurrentPage,
+    ])
+  }
+
   const loadSelectedOrders = async () => {
     const result = await orderApi.list({
       page: 1,
@@ -364,7 +374,7 @@ export function OrdersPage() {
             rowSelection={{
               selectedRowKeys: selectedIds,
               preserveSelectedRowKeys: true,
-              onChange: setSelectedIds,
+              onChange: updatePageSelection,
             }}
             pagination={{
               current: page,
